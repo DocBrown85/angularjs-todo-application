@@ -8,6 +8,8 @@ angular.module('TodoApp')
 // backended API, so we need the $q module, which is a promise library
 // packed into angularjs.
 //
+// $filter is another AngularJS builtin module to manipulate arrays.
+//
 .factory('localStorage', function($q, $filter) {
 
     // The Id used to store whithin the local storage our
@@ -20,7 +22,12 @@ angular.module('TodoApp')
     //
     var store = {
 
+        // We are modelling the todo list as an array of JSON objects.
         todos: [],
+        
+        //
+        // APIs to allow CRUD operations.
+        //
 
         create: function (todo) {
         
