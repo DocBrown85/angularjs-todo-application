@@ -8,7 +8,7 @@ angular.module('TodoApp')
 // backended API, so we need the $q module, which is a promise library
 // packed into angularjs.
 //
-// $filter is another AngularJS builtin module to manipulate arrays.
+// $filter is an AngularJS builtin module to manipulate arrays.
 //
 .factory('localStorage', function($q, $filter) {
 
@@ -31,17 +31,29 @@ angular.module('TodoApp')
 
         create: function (todo) {
         
+            // Create a new promise, which will be returned
+            // to the user as the result of this function
+            // and will be resolved once the creation is 
+            // completed
             var deferred = $q.defer();
 
+            // Extend the todo we are going to create with
+            // a unique id, to allow search and update
+            // operations
             todo = angular.extend(todo, {
                 id: Date.now()
             });
         
+            // Store the todo in our todo list
             store.todos.push(todo);
         
+            // Save the todo list in browser's local storage
             store._saveToLocalStorage(store.todos);
+
+            // Resolve the promise before returning it
             deferred.resolve(store.todos);
             
+            // Return a promise to emulate a real world API
             return deferred.promise;
 
         },
