@@ -1,0 +1,309 @@
+<!doctype html>
+<html lang="en">
+<head>
+
+    <!-- Set Page Encoding -->
+    <meta charset="UTF-8">
+
+    <!-- Take Control of Viewport -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Set Page Title -->
+    <title>AngularJS Todo App</title>
+
+    <!-- Font Awesome Icons Stylesheet -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    
+    <!-- Bootstrap Stylesheet -->
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- Application Stylesheet -->
+    <link rel="stylesheet" href="css/nice-checkbox.css">
+    <link rel="stylesheet" href="css/app.css">
+</head>
+<!--
+    Specify the root element of the AngularJS application with the
+    ng-app directive.
+    
+    NOTE: we are not specifying a controller here because we are
+    using the ng-route module to load the proper controller.
+-->
+<body data-ng-app="TodoApp">
+    <!--
+        Use Bootstrap styles to build a three column layout.
+        The application will render in the middle column.
+    -->
+    <div class="row">
+        <div class="col-md-3"></div>
+        <!--
+            The ng-view directive specifies a container to put the content provided
+            by the routing.
+        -->
+        <div class="col-md-6" id="application-container" data-ng-view></div>
+        <div class="col-md-3"></div>
+    </div>
+    <!--
+        Load the content of the <script> element into $templateCache, so that the
+        template can be used by ngInclude, ngView, or directives.
+        
+        The type of the <script> element must be specified as text/ng-template,
+        and a cache name for the template must be assigned through the element's id,
+        which can then be used as a directive's templateUrl.
+    -->
+    <script type="text/ng-template" id="todo-app-index.html">
+
+        <div id="application">
+            <!--
+                The ng-submit directive specifies a function to run when the form is submitted.
+                If the form does not have an action ng-submit will prevent the form from being
+                submitted.
+
+                In this case, when the form is submitted, the function createTodo() will be
+                called.
+            -->
+            <form id="todo-add-form" name="todo-add-form" data-ng-submit="createTodo()">
+                <div class="row">
+                    <div class="col-xs-1">
+                        <label id="toggle-all" class="nice-checkbox">
+                            <!--
+                                The ng-model directive binds the value of HTML controls (input, select, textarea)
+                                to application data.
+                                With the ng-model directive you can bind the value of an input field to a variable
+                                created in AngularJS.
+                                In this case we are bounding the "checked" status of the checkbox to the allChecked
+                                variable.
+
+                                The data-ng-click directive defines AngularJS code that will be executed when the
+                                element is being clicked.
+                                In our case, when the element is clicked, the function markAll() will be executed,
+                                passing the value of the variable allChecked as the argument.
+                            -->
+                            <input class="selectable" type="checkbox" data-ng-model="allChecked" data-ng-click="markAll(allChecked)"/>
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
+                    <div class="col-xs-11">
+                        <!--
+                            As described above, we are using th ng-model directive to bind the value of the text element to the
+                            variable newTodoDescription.
+                        -->
+                        <input type="text" placeholder="add something to do" class="form-control" name="todo-description-input" data-ng-model="newTodoDescription" required/>
+                    </div>
+                </div>
+            </form>
+            
+            <div id="todo-list">
+                <!--
+                    The ng-repeat directive repeats a set of HTML, a given number of times.
+                    The set of HTML will be repeated once per item in a collection, which
+                    must be an array or an object.
+
+                    Note: Each instance of the repetition is given its own scope, which consist
+                    of the current item.
+
+                    In this case we are repeating for each item in todos variable, which is an
+                    array holding all todos we are creating.
+
+                    We are also using filters:
+
+                    - orderBy, which allows to sort an array by an expression. In our case we are
+                      ordering by the 'text' property of the todo items.
+
+                    - filter, which allows to filter a collection by a predicate. In our case we are
+                      filtering by an object (statusFilter) which will specify the property and its value
+                      we are filtering by.
+                -->
+                <div class="row" data-ng-repeat="todo in todos | orderBy:'text' | filter: statusFilter track by $index">
+                    <!--              
+                        The ng-class directive dynamically binds one or more CSS classes to an HTML element.
+                        The value of the ng-class directive can be a string, an object, or an array.
+
+                        If it is a string, it should contain one or more, space-separated class names.
+                        As an object, it should contain key-value pairs, where the key is the class name
+                        of the class you want to add, and the value is a boolean value.
+                        The class will only be added if the value is set to true.
+
+                        As an array, it can be a combination of both. Each array element can be either a
+                        string, or an object, described as above.
+
+                        In our case we are dynamically adding/removing the class "editing" based on the
+                        truth value of the expression "todo == editedTodo", where todo and editedTodo are
+                        variables whithin the application's scope.
+                    -->
+                    <div class="todo-view col-xs-12" data-ng-class="{editing: todo == editedTodo}">
+                        <div class="row">
+                            <div class="col-xs-1">
+                                <label class="nice-checkbox">
+                                    <!--
+                                        As described above, we are using the ng-model directive to bind the
+                                        value of the checkbox to a variable whithin the application scope.
+                                        Since we are using the ng-repeat directive, each instance of the 
+                                        repetition is given its own scope (which consist of the current item),
+                                        so we are bounding the value of the checkbox to the property "done" of
+                                        the current todo item.
+
+                                        We are also binding the execution of the function "toggleDone()" (which receives
+                                        the current item as the first argument) on "change" events occurring to the
+                                        checkbox.
+                                    -->
+                                    <input type="checkbox" data-ng-model="todo.done" data-ng-change="toggleDone(todo)">
+                                    <span class="checkmark"></span>
+                                </label>
+                            </div>
+                            <div class="col-xs-10">
+                                <!--
+                                    Here we are binding the execution of the function editTodo() (which receives
+                                    the current item as the first argument) on "double click" events occurring 
+                                    to the label using the ng-dblclick directive.
+
+                                    We are also dynamically assigning the class "done" to the element on the basis of the
+                                    value of the "done" property of the binded "todo" item.
+                                -->
+                                <label class="todo-text selectable" data-ng-dblclick="editTodo(todo)" data-ng-class="{'done':todo.done}">
+                                    <!--
+                                        Here we are setting the displayed text of the label as the value of the
+                                        "text" property of the current todo item.
+                                    -->
+                                    {{todo.text}}
+                                </label>
+                            </div>
+                            <div class="col-xs-1">
+                                <!--
+                                    Here we are binding the execution of the function deleteTodo() (which receives
+                                    the current item as the first argument) on "double click" events occurring 
+                                    to the inline element using the ng-dblclick directive.
+                                -->
+                                <i class="selectable icon-delete fa fa-close pull-right" data-ng-dblclick="deleteTodo(todo)"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <!--
+                        With ng-submit directive we are binding the execution of the saveTodo() function to 
+                        "submit" events of the form.
+                        We are also dynamically assigning the class "hidden" to the form depending on the
+                        value of the expression "todo != editedTodo", where "todo" and "editedTodo" are
+                        variables in our application's scope.
+                    -->
+                    <form data-ng-submit="saveTodo(todo, 'submit')" data-ng-class="{hidden: todo != editedTodo}">
+                        <div class="todo-view col-xs-12">
+                            <!--
+                                With ng-model directive we are binding the value of the textbox to
+                                a variable whithin the application scope.
+                                Since we are using the ng-repeat directive, each instance of the 
+                                repetition is given its own scope (which consist of the current item),
+                                so we are bounding the value of the textbox to the property "text" of
+                                the current todo item.
+
+                                With the ng-blur directive we are binding the execution of the
+                                saveTodo() function (which receives the current todo and the string 'blur'
+                                as arguments) when the input field loses focus (onblur).
+
+                                With ng-trim directive we are disabling the automatic trimming of the input
+                                text.
+
+                                With set-focus we are setting a custom directive to set the focus on this
+                                element, which will be executed when the expression 'todo == editedTodo'
+                                evaluates to true.
+                            -->
+                            <input type="text" class="edit" data-ng-model="todo.text" data-ng-blur="saveTodo(todo, 'blur')" data-ng-trim="false" data-set-focus="todo == editedTodo">
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+
+            <div class="info">
+                <!--
+                    ng-pluralize is a directive that displays messages according to en-US localization rules.
+                    These rules are bundled with angular.js, but can be overridden (see AngularJS i18n dev guide).
+                    
+                    You configure ngPluralize directive by specifying the mappings between plural categories and
+                    the strings to be displayed.
+
+                    You configure ngPluralize by providing 2 attributes: count and when.
+                    You can also provide an optional attribute, offset.
+
+                    The value of the count attribute can be either a string or an AngularJS expression;
+                    these are evaluated on the current scope for its bound value.
+
+                    The when attribute specifies the mappings between plural categories and the actual
+                    string to be displayed. The value of the attribute should be a JSON object.
+
+                    Here we are configuring ng-pluralize to display '{} item left' or '{} items left'
+                    depending on the value of the 'remainingCount' variable to be 1 or not.
+                    In either cases '{}' will be substituted with the current value of "remainingCount".
+                -->
+                <ng-pluralize count="remainingCount" when="{ one: '{} item left', other: '{} items left' }"></ng-pluralize>
+            </div>
+
+            <div class="toolbar">
+                <div id="available-filters" class="btn-group btn-group-justified">
+                    <div class="btn-group">
+                        <!--
+                            With the ng-class directive we are dynamically assigning the class "active" to 
+                            the button depending on the value of the expression "filteringBy == 'all'",
+                            where "filteringBy" is a variable in our application's scope.
+
+                            With the ng-click directive we are binding the execution of the function
+                            filterBy() (which receives the string 'all' as the first argument) on 
+                            "click" events occurring to the button.
+                        -->
+                        <button type="button" class="btn btn-primary" data-ng-class="{active: filteringBy == 'all'}" data-ng-click="filterBy('all')">View All</button>
+                    </div>
+                    <div class="btn-group">
+                        <!--
+                            With the ng-class directive we are dynamically assigning the class "active" to 
+                            the button depending on the value of the expression "filteringBy == 'notCompleted'",
+                            where "filteringBy" is a variable in our application's scope.
+
+                            With the ng-click directive we are binding the execution of the function
+                            filterBy() (which receives the string 'notCompleted' as the first argument) on 
+                            "click" events occurring to the button.
+                        -->
+                        <button type="button" class="btn btn-primary" data-ng-class="{active: filteringBy == 'notCompleted'}" data-ng-click="filterBy('notCompleted')">View Pending</button>
+                    </div>
+                    <div class="btn-group">
+                        <!--
+                            With the ng-class directive we are dynamically assigning the class "active" to 
+                            the button depending on the value of the expression "filteringBy == 'completed'",
+                            where "filteringBy" is a variable in our application's scope.
+
+                            With the ng-click directive we are binding the execution of the function
+                            filterBy() (which receives the string 'completed' as the first argument) on 
+                            "click" events occurring to the button.
+                        -->
+                        <button type="button" class="btn btn-primary" data-ng-class="{active: filteringBy == 'completed'}" data-ng-click="filterBy('completed')">View Completed</button>
+                    </div>
+                </div>
+                <div id="available-actions">
+                    <!--
+                        With the ng-click directive we are binding the execution of the function
+                        deleteCompleted() on "click" events occurring to the button.
+                    -->
+                    <button type="button" class="btn btn-primary btn-block" data-ng-click="deleteCompleted()">Delete Completed</button>
+                </div>
+            </div>
+    
+        </div>
+    
+    </script>
+
+    <!-- Angular Library, also bring in jQuery replacement jQlite -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.6.1/angular-route.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-animate.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.1/angular-sanitize.js"></script>
+
+    <!-- Boostrap Library for AngularJS -->
+    <script src="https://angular-ui.github.io/bootstrap/ui-bootstrap-tpls-2.5.0.js"></script>
+    
+    <!-- Todo Application Code -->
+    <script src="app.js"></script>
+    <script src="services/persist/storage-factory.js"></script>
+    <script src="services/persist/local-storage.js"></script>
+    <script src="services/persist/remote-api.js"></script>
+    <script src="controllers/todo-controller.js"></script>
+    <script src="directives/set-focus.js"></script>
+    
+</body>
+</html>

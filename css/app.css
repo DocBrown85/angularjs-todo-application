@@ -1,0 +1,47 @@
+#todo-add-form {
+    margin-top: 4px;
+    margin-bottom: 4px;
+    padding: 20px;
+}
+.done {
+    text-decoration: line-through;
+    color: #ccc;
+}
+.info {
+    text-align: center;
+}
+.toolbar {
+    padding: 20px;
+}
+#toggle-all {
+    margin-top: 4px;
+}
+#todo-list {
+    padding: 20px;
+}
+#todo-list .editing {
+    display: none;
+}
+.todo-text {
+    font-size: 20px;
+    display: block;
+}
+.hidden {
+    display: none;
+}
+.selectable {
+    cursor: pointer;
+}
+.icon-delete {
+    font-size: 25px;
+    color: rgb(243, 14, 14);
+}
+#available-actions {
+    margin-top: 7px;
+}
+.edit {
+    width: 100%;
+    margin: 0;
+    font-size: 19px;
+	border: 0;
+}
