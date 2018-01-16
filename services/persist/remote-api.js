@@ -5,19 +5,19 @@ angular.module('TodoApp')
     var store = {
 
         create: function (todo) {
-            
+            // TODO
         },
     
         read: function () {
-            
+            // TODO
         },
     
         update: function (todo) {
-            
+            // TODO
         },
     
         delete: function (todo) {
-            
+            // TODO
         }
 
     };
