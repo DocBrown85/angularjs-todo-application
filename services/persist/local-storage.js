@@ -41,7 +41,7 @@ angular.module('TodoApp')
             // a unique id, to allow search and update
             // operations
             todo = angular.extend(todo, {
-                id: Date.now()
+                _id: Date.now()
             });
         
             // Store the todo in our todo list
