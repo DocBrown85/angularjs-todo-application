@@ -4,6 +4,14 @@
 //
 angular.module('TodoApp', ['ngRoute'])
 //
+// Define a value which can be injected when necessary
+//
+.value(
+    'config', {
+        apiBaseURL: "http://192.168.64.131:3000/api/"
+    }
+)
+//
 // When an AngularJS app is started, it has a certain “boot-order”.
 // First the "config" step.
 //
