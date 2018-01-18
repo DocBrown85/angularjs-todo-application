@@ -69,7 +69,10 @@ angular.module('TodoApp')
 			return;
 		}
 
-		$scope.saveEvent = event;
+        $scope.saveEvent = event;
+        
+        if (todo.text == null)
+            return;
         
         todo.text = todo.text.trim();
 
